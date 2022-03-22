@@ -1,9 +1,10 @@
 from urllib.parse import urlparse
 from lxml import html
+import requests
 
-def get_urls_from_string(string, base_url):
-    page = html.fromstring(string, base_url)
-    page.make_links_absolute(base_url)
+def get_urls_from_string(request, base_url):
+    page = html.fromstring(request, base_url)
+    page.make_links_absolute(base_url = base_url)
     urls = []
     for elem in page.iter():
         if elem.tag == "a":
@@ -17,3 +18,12 @@ def normalize_url(url):
     while len(normalized_url) > 0 and normalized_url[-1] == "/": #while last character of URL is /, remove it.
             normalized_url = normalized_url[:-1]
     return normalized_url
+
+def crawl_page(base_url, pages):
+    pages_dict = pages
+    request = requests.get(base_url)
+    urls = get_urls_from_string(request.content, base_url)
+    for url in urls:
+        pages_dict[normalize_url(url)] = 1
+    return pages_dict
+
